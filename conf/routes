@@ -5,6 +5,9 @@
 # Home page
 GET     /                                       Application.index
 
+WS      /helloSocket                            MyWebSocket.hello
+WS      /echoSocket                             MyWebSocket.echo
+
 # Ignore favicon requests
 GET     /favicon.ico                            404
 
