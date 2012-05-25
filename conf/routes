@@ -8,6 +8,8 @@ GET     /                                       Application.index
 WS      /helloSocket                            MyWebSocket.hello
 WS      /echoSocket                             MyWebSocket.echo
 
+GET     /control                                Directions.control
+
 # Ignore favicon requests
 GET     /favicon.ico                            404
 
