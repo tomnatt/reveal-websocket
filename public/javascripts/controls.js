@@ -16,7 +16,7 @@ function connectionReady() {
 }
 
 function connect() {
-    ws = new WebSocket("ws://ccpc-twn.bath.ac.uk:9000/echoSocket");
+    ws = new WebSocket("ws://localhost:9000/echoSocket");
 
     ws.onopen = function(evt) { 
         console.log("connected");

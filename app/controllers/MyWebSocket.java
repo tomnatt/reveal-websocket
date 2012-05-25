@@ -2,6 +2,8 @@ package controllers;
 
 import play.*;
 import play.libs.F.*;
+import static play.libs.F.Matcher.*;
+import static play.mvc.Http.WebSocketEvent.*;
 import play.mvc.*;
 import play.mvc.Http.*;
 
@@ -19,38 +21,37 @@ public class MyWebSocket extends WebSocketController {
     public static void echo() {
         
         while (inbound.isOpen()) {
-            //WebSocketEvent e = await(inbound.nextEvent());
-            //WebSocketEvent e = await(StatefulModel.instance.event.nextEvent());
             
+            CommandModel comm = CommandModel.get();
             
-            //StatefulModel.instance.event.publish
-            
-            Object event = await(StatefulModel.instance.event.nextEvent());
-            System.out.println(event.getClass().toString());
-            //outbound.send(event);
-            
-            /*
-            if (e instanceof WebSocketFrame) {
+            // Socket connected, get the command stream
+            EventStream<CommandModel.Event> commandMessagesStream = comm.join();
+         
+            // Loop while the socket is open
+            while(inbound.isOpen()) {
                 
-                WebSocketFrame frame = (WebSocketFrame)e;
-                if (!frame.isBinary) {
-                    if(frame.textData.equals("quit")) {
-                        outbound.send("Bye!");
-                        disconnect();
-                    } else {
-                        
-                        System.out.println(frame.textData);
-                        outbound.send("Echo: %s", frame.textData);
-                        
-                        
-                    }
+                // Wait for an event (either something coming on the inbound socket channel, or ChatRoom messages)
+                Either<WebSocketEvent,CommandModel.Event> e = await(Promise.waitEither(
+                    inbound.nextEvent(), 
+                    commandMessagesStream.nextEvent()
+                ));
+                
+                // Case: TextEvent received on the socket
+                for(String message: TextFrame.match(e._1)) {
+                    comm.order(message);
                 }
-            }
-            
-            if (e instanceof WebSocketClose) {
-                Logger.info("Socket closed!");
-            }
-            */
+                
+                // Case: New command
+                for(CommandModel.Command command: ClassOf(CommandModel.Command.class).match(e._2)) {
+                    outbound.send(command.text);
+                }
+                
+                // Case: The socket has been closed
+                for(WebSocketClose closed: SocketClosed.match(e._1)) {
+                    disconnect();
+                } 
+                
+            }    
             
         }
     }
