@@ -49,12 +49,26 @@ function send(words) {
 // http://stackoverflow.com/questions/7919856/how-to-use-websockets-with-play-framework
 
 function pageReady() {
-    
-    $("#leftControl").click(function() {
+
+    alert("foo");
+
+    $("#upControl").bind("tap", function() {
+        alert("move up");
+        send("move up");
+    });
+
+    $("#downControl").bind("tap", function() {
+        alert("move down");
         send("move left");
     });
     
-    $("#rightControl").click(function() {
+    $("#leftControl").bind("tap", function() {
+        alert("move left");
+        send("move left");
+    });
+    
+    $("#rightControl").bind("tap", function() {
+        alert("move right");
         send("move right");
     });
     
